@@ -1,6 +1,15 @@
 # C-Deck
 
 Petite application de bureau Flet pour stocker, retrouver, copier, importer et exporter les commandes que tu utilises souvent.
+<img width="1917" height="1017" alt="image" src="https://github.com/user-attachments/assets/afb40f0f-3ae8-4f7c-9b79-ca6e477d01cd" />
+<img width="1917" height="1017" alt="image" src="https://github.com/user-attachments/assets/e765632a-96b5-4ba4-b98b-49bba2f2c79b" />
+
+<img width="1917" height="1022" alt="image" src="https://github.com/user-attachments/assets/80880be0-c0b4-4282-9f0f-eb1254ffe20c" />
+<img width="1916" height="1017" alt="image" src="https://github.com/user-attachments/assets/ab08e35b-d946-48d9-bb36-152725a70cce" />
+<img width="1917" height="1021" alt="image" src="https://github.com/user-attachments/assets/ae806097-4230-4c3b-aa28-ac4ecfeb2d93" />
+
+
+
 
 ## Lancer
 
