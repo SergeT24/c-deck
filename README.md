@@ -36,7 +36,29 @@ assets/c-deck-icon.ico
 python3 -m unittest discover -s tests -v
 ```
 
-## Build Windows
+## Build Windows rapide (.exe sans Visual Studio)
+
+Depuis WSL, à la racine du projet :
+
+```bash
+./build_windows.sh
+```
+
+Le script utilise le venv Windows (`.venv\Scripts`), installe PyInstaller si besoin et lance `flet pack`.
+Résultat : `dist\C-Deck.exe` (un seul fichier, avec l'icône et la version lue dans `c_deck/__init__.py`).
+
+Ferme C-Deck avant de lancer le build : si l'exe est ouvert (fichier verrouillé), le script s'arrête avec une erreur explicite. Il vérifie aussi à la fin que l'exe a bien été régénéré.
+
+Équivalent manuel depuis PowerShell :
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install pyinstaller
+.\.venv\Scripts\flet.exe pack main.py -n C-Deck -i assets\c-deck-icon.ico --add-data "assets;assets" --product-name C-Deck --product-version 0.0.1 --file-version 0.0.1.0 -y
+```
+
+Le premier lancement de l'exe est un peu lent (décompression dans un dossier temporaire).
+
+## Build Windows (Flutter, `flet build`)
 
 Le build Windows Flet nécessite trois prérequis côté système :
 
@@ -126,6 +148,27 @@ Exemple :
 Au moment de copier, l'application demande la valeur de `class_task`, puis copie la commande finale.
 
 Les anciennes commandes qui déclarent explicitement leurs variables avec `variables` peuvent encore utiliser `$nom_variable`; les nouvelles détections automatiques utilisent `{{nom_variable}}` pour éviter les collisions avec les variables shell comme `$HOME`.
+
+## Raccourcis clavier
+
+| Raccourci | Action |
+| --- | --- |
+| `Ctrl+F` | Aller dans la recherche |
+| `↑` / `↓` | Sélectionner la commande précédente / suivante (hors champs d'édition) |
+| `Ctrl+C` | Copier la commande sélectionnée (hors champs d'édition, où il copie le texte normalement) |
+| `Ctrl+N` | Nouvelle commande |
+| `Ctrl+S` | Enregistrer |
+| `Échap` | Annuler les modifications / fermer la boîte de dialogue |
+| `F1` | Afficher le récapitulatif des raccourcis |
+
+Dans l'app, le bouton clavier en bas de la barre latérale affiche ce récapitulatif, et le bouton ⓘ affiche la fenêtre « À propos » (nom, version, auteur, emplacement des données).
+La version est définie dans `c_deck/__init__.py` (`__version__`) : c'est elle qu'utilisent l'app et `build_windows.sh`.
+
+Si la commande en cours d'édition a été modifiée, changer de commande (clic, flèches, `Ctrl+N`, dupliquer) demande d'abord : **Rester**, **Ignorer** ou **Enregistrer**.
+
+Le bouton **Dupliquer** (à côté de Copier) crée une copie « (copie) » de la commande sélectionnée.
+
+Lors de la copie d'une commande avec variables, les 5 dernières valeurs utilisées pour chaque variable sont proposées sous le champ (stockées dans `variable_history`).
 
 ## Recherche avancée
 

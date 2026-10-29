@@ -1,6 +1,6 @@
 [project]
 name = "c-deck"
-version = "0.1.0"
+version = "0.0.1"
 description = "C-Deck desktop command notebook built with Flet."
 readme = "README.md"
 requires-python = ">=3.10"

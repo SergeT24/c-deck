@@ -182,6 +182,21 @@ def is_dangerous_command(command: str) -> bool:
     )
 
 
+def normalize_variable_history(value: Any, variables: list[str], max_values: int = 5) -> dict[str, list[str]]:
+    if not isinstance(value, dict):
+        return {}
+    allowed = {variable.lower(): variable for variable in variables}
+    history: dict[str, list[str]] = {}
+    for raw_key, raw_values in value.items():
+        key = allowed.get(str(raw_key).lower())
+        if key is None or not isinstance(raw_values, list):
+            continue
+        values = [str(item) for item in raw_values if str(item).strip()][:max_values]
+        if values:
+            history[key] = values
+    return history
+
+
 def split_search_query(query: str) -> list[str]:
     try:
         return shlex.split(query)
@@ -201,6 +216,7 @@ class CommandEntry:
     favorite: bool = False
     confirm_before_copy: bool = False
     use_count: int = 0
+    variable_history: dict[str, list[str]] = field(default_factory=dict)
     id: str = field(default_factory=lambda: str(uuid4()))
     created_at: str = field(default_factory=utc_now)
     updated_at: str = field(default_factory=utc_now)
@@ -231,8 +247,13 @@ class CommandEntry:
             variable_defaults=variable_defaults,
             notes=str(data.get("notes") or ""),
             favorite=bool(data.get("favorite", False)),
-            confirm_before_copy=bool(data.get("confirm_before_copy", False)) or is_dangerous_command(command),
+            confirm_before_copy=(
+                bool(data["confirm_before_copy"])
+                if "confirm_before_copy" in data
+                else is_dangerous_command(command)
+            ),
             use_count=use_count,
+            variable_history=normalize_variable_history(data.get("variable_history"), variables),
             created_at=str(data.get("created_at") or now),
             updated_at=str(data.get("updated_at") or now),
             last_used_at=data.get("last_used_at"),
@@ -251,6 +272,7 @@ class CommandEntry:
             "favorite": self.favorite,
             "confirm_before_copy": self.confirm_before_copy,
             "use_count": self.use_count,
+            "variable_history": self.variable_history,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
             "last_used_at": self.last_used_at,
@@ -264,6 +286,14 @@ class CommandEntry:
         self.use_count += 1
         self.last_used_at = now
         self.updated_at = now
+
+    def remember_variable_values(self, values: dict[str, str], max_values: int = 5) -> None:
+        """Keep the most recent distinct values used for each variable, newest first."""
+        for variable, value in values.items():
+            if not value.strip() or variable not in self.variables:
+                continue
+            previous = [item for item in self.variable_history.get(variable, []) if item != value]
+            self.variable_history[variable] = [value, *previous][:max_values]
 
     def matches(self, query: str, category: str | None = None, tag: str | None = None) -> bool:
         if category and category != "Toutes" and self.category.lower() != category.lower():

@@ -82,6 +82,28 @@ class StorageTest(unittest.TestCase):
         self.assertEqual(command.use_count, 1)
         self.assertTrue(command.matches("used:true"))
 
+    def test_explicit_confirm_false_is_kept_for_dangerous_command(self):
+        command = CommandEntry.from_dict(
+            {
+                "title": "Maj Moodle",
+                "command": "php admin/cli/upgrade.php --non-interactive",
+                "confirm_before_copy": False,
+            }
+        )
+
+        self.assertFalse(command.confirm_before_copy)
+        self.assertFalse(CommandEntry.from_dict(command.to_dict()).confirm_before_copy)
+
+    def test_variable_history_keeps_recent_distinct_values(self):
+        command = CommandEntry.from_dict(
+            {"title": "Task", "command": "php run.php --task='{{class_task}}'"}
+        )
+        for value in ["a", "b", "a", "c", "d", "e", "f", "  "]:
+            command.remember_variable_values({"class_task": value, "unknown": "x"}, max_values=5)
+
+        self.assertEqual(command.variable_history, {"class_task": ["f", "e", "d", "c", "a"]})
+        self.assertEqual(CommandEntry.from_dict(command.to_dict()).variable_history, command.variable_history)
+
     def test_dangerous_variants_are_detected(self):
         self.assertTrue(is_dangerous_command("rm -fr /tmp/demo"))
         self.assertTrue(is_dangerous_command("sudo rm --recursive --force /tmp/demo"))
